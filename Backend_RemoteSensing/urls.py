@@ -17,7 +17,9 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
+from user import views as views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("users/", views.get_users),  # 获取所有用户信息的接口
 ]
