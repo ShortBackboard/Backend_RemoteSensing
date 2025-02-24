@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 
@@ -26,7 +27,9 @@ def get_users(request):
         # 如果出现异常，返回
         return JsonResponse({'code': 0, 'msg': "获取用户信息出现异常，具体错误：" + str(e)})
 
-def query_users(request):
+
+@csrf_exempt  # 若是不想配置cookie内的字段可以装饰函数，不检查CSRF
+def query_users(request): 
     """查询用户信息"""
     # 接收传递过来的查询条件--- axios默认是json --- 字典类型（'inputstr'）-- data['inputstr']
     data = json.loads(request.body.decode('utf-8'))
@@ -42,6 +45,24 @@ def query_users(request):
     except Exception as e:
         # 如果出现异常，返回
         return JsonResponse({'code': 0, 'msg': "查询学生信息出现异常，具体错误：" + str(e)})
+
+
+@csrf_exempt
+def is_exists_no(request):
+    """判断账号是否存在"""
+    # 接收传递过来的学号
+    data = json.loads(request.body.decode('utf-8'))
+    # 进行校验
+    try:
+        obj_users = User.objects.filter(no=data['no'])
+        if obj_users.count() == 0:
+            return JsonResponse({'code': 1, 'exists': False})
+        else:
+            return JsonResponse({'code': 1, 'exists': True})
+    except Exception as e:
+        return JsonResponse({'code': 0, 'msg': "校验账号失败，具体原因：" + str(e)})
+
+
 
 
 

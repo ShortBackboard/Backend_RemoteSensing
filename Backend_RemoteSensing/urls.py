@@ -23,4 +23,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("users/", views.get_users),  # 获取所有用户信息的接口
     path("users/query/", views.query_users),  # 查询用户信息的接口
+    path("no/check/", views.is_exists_no),  # 判断账号是否已经存在
 ]
