@@ -63,6 +63,28 @@ def is_exists_no(request):
         return JsonResponse({'code': 0, 'msg': "校验账号失败，具体原因：" + str(e)})
 
 
+@csrf_exempt
+def add_user(request):
+    """添加用户到数据库"""
+    # 初始化时密码和账号一致
+    # 接收前端传递过来的值
+    data = json.loads(request.body.decode("utf-8"))
+    try:
+        # 添加到数据库
+        obj_user = User(no=data['no'],name=data['name'], gender=data['gender'],
+                              birthday=data['birthday'], mobile=data['mobile'], password=data['no'],
+                              email=data['email'], address=data['address'], career=data['career'])
+        # 执行添加
+        obj_user.save()
+        # 使用ORM获取所有学生信息 并把对象转为字典格式
+        obj_users = User.objects.all().values()
+        # 把外层的容器转为List
+        users = list(obj_users)
+        # 返回
+        return JsonResponse({'code': 1, 'data': users})
+    except Exception as e:
+        return JsonResponse({'code': 0, 'msg': "添加到数据库出现异常，具体原因：" + str(e)})
+
 
 
 
