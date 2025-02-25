@@ -25,4 +25,5 @@ urlpatterns = [
     path("users/query/", views.query_users),  # 查询用户信息的接口
     path("no/check/", views.is_exists_no),  # 判断账号是否已经存在
     path("users/add/", views.add_user),  # 添加用户信息的接口
+    path("users/update/", views.update_user),  # 修改用户信息的接口
 ]

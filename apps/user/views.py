@@ -86,6 +86,32 @@ def add_user(request):
         return JsonResponse({'code': 0, 'msg': "添加到数据库出现异常，具体原因：" + str(e)})
 
 
+@csrf_exempt
+def update_user(request):
+    """修改用户到数据库"""
+    # 接收前端传递过来的值
+    data = json.loads(request.body.decode("utf-8"))
+    try:
+        # 查找到要修改的学生信息
+        obj_user = User.objects.get(no=data['no'])
+        # 依次修改
+        obj_user.name = data['name']
+        obj_user.gender = data['gender']
+        obj_user.birthday = data['birthday']
+        obj_user.mobile = data['mobile']
+        obj_user.email = data['email']
+        obj_user.address = data['address']
+        obj_user.career = data['career']
+        # 保存
+        obj_user.save()
+        # 使用ORM获取所有学生信息 并把对象转为字典格式
+        obj_users = User.objects.all().values()
+        # 把外层的容器转为List
+        students = list(obj_users)
+        # 返回
+        return JsonResponse({'code': 1, 'data': students})
+    except Exception as e:
+        return JsonResponse({'code': 0, 'msg': "修改保存到数据库出现异常，具体原因：" + str(e)})
 
 
 
