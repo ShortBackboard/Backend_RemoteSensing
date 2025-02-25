@@ -134,6 +134,28 @@ def delete_user(request):
         return JsonResponse({'code': 0, 'msg': "删除用户信息写入数据库出现异常，具体原因：" + str(e)})
 
 
+@csrf_exempt
+def delete_users(request):
+    """批量删除用户信息"""
+    # 接收前端传递过来的值
+    data = json.loads(request.body.decode("utf-8"))
+    try:
+        # 遍历传递的集合
+        for one_user in data['user']:
+            # 查询当前记录
+            obj_user = User.objects.get(no=one_user['no'])
+            # 执行删除
+            obj_user.delete()
+        # 使用ORM获取所有学生信息 并把对象转为字典格式
+        obj_users = User.objects.all().values()
+        # 把外层的容器转为List
+        users = list(obj_users)
+        # 返回
+        return JsonResponse({'code': 1, 'data': users})
+    except Exception as e:
+        return JsonResponse({'code': 0, 'msg': "批量删除用户信息写入数据库出现异常，具体原因：" + str(e)})
+
+
 
 
 

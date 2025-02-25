@@ -26,5 +26,6 @@ urlpatterns = [
     path("no/check/", views.is_exists_no),  # 判断账号是否已经存在
     path("users/add/", views.add_user),  # 添加用户信息的接口
     path("users/update/", views.update_user),  # 修改用户信息的接口
-    path("users/delete/", views.delete_user),  # 删除一条用户信息的接口
+    path("user/delete/", views.delete_user),  # 删除一条用户信息的接口
+    path("users/delete/", views.delete_users),  # 批量删除用户信息的接口
 ]
