@@ -28,4 +28,5 @@ urlpatterns = [
     path("users/update/", views.update_user),  # 修改用户信息的接口
     path("user/delete/", views.delete_user),  # 删除一条用户信息的接口
     path("users/delete/", views.delete_users),  # 批量删除用户信息的接口
+    path("users/login/", views.login_user),  # 用户登录的接口
 ]

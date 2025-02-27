@@ -12,6 +12,17 @@ from django.http import JsonResponse
 import json
 # 导入Q查询
 from django.db.models import Q
+# 导入uuid类
+import uuid
+# 导入哈希库
+import hashlib
+# 导入Setting
+from django.conf import settings
+# 导入os
+import os
+# 引入处理Excel模块
+from django.contrib.auth import authenticate, login
+
 
 
 def get_users(request):
@@ -154,6 +165,45 @@ def delete_users(request):
         return JsonResponse({'code': 1, 'data': users})
     except Exception as e:
         return JsonResponse({'code': 0, 'msg': "批量删除用户信息写入数据库出现异常，具体原因：" + str(e)})
+
+
+def get_random_str():
+    # 获取uuid的随机数
+    uuid_val = uuid.uuid4()
+    # 获取uuid的随机数字符串
+    uuid_str = str(uuid_val).encode('utf-8')
+    # 获取md5实例
+    md5 = hashlib.md5()
+    # 拿取uuid的md5摘要
+    md5.update(uuid_str)
+    # 返回固定长度的字符串
+    return md5.hexdigest()
+
+
+@csrf_exempt
+def login_user(request):
+    """ 用户登录验证 """
+
+    data = json.loads(request.body.decode("utf-8"))
+
+    try:
+        # 查找到要验证的用户信息
+        obj_user = User.objects.get(no=data['no'])
+
+        # 验证密码
+        if obj_user.password == data['password']:
+            # 返回成功信息
+            return JsonResponse({'code': 1, 'msg': "登录成功"})
+        else:
+            # 返回失败信息
+            return JsonResponse({'code': 0, 'msg': "账号或密码错误"})
+    except Exception as e:
+        return JsonResponse({'code': 0, 'msg': "登录出现异常，具体原因：" + str(e)})
+
+
+
+
+
 
 
 
