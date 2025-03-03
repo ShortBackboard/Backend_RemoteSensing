@@ -23,6 +23,11 @@ import os
 # 引入处理Excel模块
 from django.contrib.auth import authenticate, login
 
+# Python随机森林回归预测叶绿素浓度
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+import joblib
 
 
 def get_users(request):
@@ -258,9 +263,43 @@ def update_user_login(request):
         return JsonResponse({'code': 0, 'msg': "修改保存到数据库出现异常，具体原因：" + str(e)})
 
 
+@csrf_exempt
+def chl_pre(request):
+    # 保存模型的文件
+    model_filename = r'E:\GraduationDesign\Backend_RemoteSensing\media\chl_train.joblib'
 
+    # 接收前端传递过来的值
+    data = json.loads(request.body.decode("utf-8"))
 
+    # 新的数据点
+    pre_data = {
+        'BARO_Avg': data['BARO_Avg'],  # 气压高度，mbar
+        'Temp_Avg': data['Temp_Avg'],  # 摄氏温度，Celsius，℃
+        'pH_Avg': data['pH_Avg'],  # Ph值
+        'Cond_Avg': data['Cond_Avg'],  # 电导率，uS/cm
+        'TDS_Avg': data['TDS_Avg'],  # 总溶解固体，mg/L
+        'DO_Sat_Avg': data['DO_Sat_Avg'],  # 溶解氧饱和度，%
+        'Airmar_Pressure': data['Airmar_Pressure'],  # 空气压力，hPa
+        'Airmar_Temperature': data['Airmar_Temperature'],  # 空气温度，DegC
+        'Airmar_Humidity': data['Airmar_Humidity'],  # 空气湿度，%
+        'Airmar_WindSpeed': data['Airmar_WindSpeed'],  # 风速，m/s
+    }
 
+    df = pd.DataFrame(pre_data, index=[0])
+
+    # 加载模型
+    loaded_model = joblib.load(model_filename)
+
+    # 使用加载的模型进行预测
+    chl_prediction = loaded_model.predict(df)
+
+    # 将预测结果转换为字典格式
+    response_data = {
+        'chl_prediction': chl_prediction[0]
+    }
+
+    # 返回
+    return JsonResponse({'code': 1, 'data': response_data})
 
 
 

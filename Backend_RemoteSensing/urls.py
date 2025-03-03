@@ -31,4 +31,5 @@ urlpatterns = [
     path("users/login/", views.login_user),  # 用户登录的接口
     path("users/register/", views.register_user),  # 用户注册的接口
     path("users/update_login/", views.update_user_login),  # 用户界面修改个人信息
+    path("users/chlPre/", views.chl_pre),  # 叶绿素浓度预测
 ]
