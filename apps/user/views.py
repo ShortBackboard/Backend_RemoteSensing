@@ -32,8 +32,10 @@ import joblib
 # 处理tif影像
 import rasterio
 from rasterio.plot import show
-import matplotlib.pyplot as plt
 import numpy as np
+
+from osgeo import gdal
+
 
 
 def get_users(request):
@@ -341,7 +343,7 @@ def tif_basicInfo(request):
     # 接收前端传递过来的值，文件名
     data = json.loads(request.body.decode("utf-8"))
 
-    # 查找到要修改的学生信息
+    # 目标文件
     target_file = os.path.join(settings.MEDIA_ROOT + data['tifUrl'])
 
     print(target_file)
@@ -357,6 +359,59 @@ def tif_basicInfo(request):
 
         # 返回
         return JsonResponse({'code': 1, 'data': response_data})
+
+
+@csrf_exempt
+def tif_divide(request):
+    """分解多波段Tif影像，返回保存的路径"""
+    # 接收前端传递过来的值，文件名
+    data = json.loads(request.body.decode("utf-8"))
+
+    # 目标文件
+    input_tiff = os.path.join(settings.MEDIA_ROOT + data['tifUrl'])
+    output_dir = settings.MEDIA_ROOT
+
+    # 打开多波段TIFF文件
+    dataset = gdal.Open(input_tiff)
+
+    # 获取波段数量
+    band_count = dataset.RasterCount
+    print(f"Number of bands: {band_count}")
+
+    # 遍历每个波段并保存为单独的TIFF文件
+    for i in range(1, band_count + 1):
+        band = dataset.GetRasterBand(i)
+        output_tiff = os.path.join(output_dir, f"band_{i}.tif")
+
+        # 创建新的数据集用于存储单波段图像
+        driver = gdal.GetDriverByName('GTiff')
+        out_dataset = driver.Create(output_tiff, band.XSize, band.YSize, 1, band.DataType)
+
+        # 设置地理变换和投影信息
+        out_dataset.SetGeoTransform(dataset.GetGeoTransform())
+        out_dataset.SetProjection(dataset.GetProjection())
+
+        # 写入单波段数据
+        out_dataset.GetRasterBand(1).WriteArray(band.ReadAsArray())
+
+        # 关闭输出数据集
+        out_dataset.FlushCache()
+        out_dataset = None
+
+        print(f"Saved band {i} to {output_tiff}")
+
+    # 关闭输入数据集
+    dataset = None
+
+    response_data = {
+        'output_dir': output_dir
+    }
+
+    # 返回
+    return JsonResponse({'code': 1, 'data': response_data})
+
+
+
 
 
 

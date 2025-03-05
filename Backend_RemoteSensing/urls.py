@@ -36,6 +36,7 @@ urlpatterns = [
     path("users/chlPre/", views.chl_pre),  # 叶绿素浓度预测
     path("upload/", views.upload),  # 上传TIF影像
     path("get_basicTifInfo/", views.tif_basicInfo),  # 获取TIF影像基本信息
+    path("tifDivede/", views.tif_divide),  # 分解多波段TIF影像
 ]
 
 # 添加这行--- 允许所有的media文件被访问
