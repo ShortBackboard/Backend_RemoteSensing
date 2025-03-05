@@ -411,6 +411,58 @@ def tif_divide(request):
     return JsonResponse({'code': 1, 'data': response_data})
 
 
+@csrf_exempt
+def tif_merge(request):
+    """合成多波段Tif影像，返回保存的路径"""
+    # 接收前端传递过来的值，文件名
+
+    data = json.loads(request.body.decode("utf-8"))
+
+    # 目标文件
+    input_tiffs = data['tifList']
+    sentinel1_ds = gdal.Open(os.path.join(settings.MEDIA_ROOT + input_tiffs[0]))
+    sentinel2_ds = gdal.Open(os.path.join(settings.MEDIA_ROOT + input_tiffs[1]))
+
+    # 读取哨兵1和哨兵2的数据
+    sentinel1_data = sentinel1_ds.ReadAsArray()
+    sentinel2_data = sentinel2_ds.ReadAsArray()
+
+    # 获取哨兵1和哨兵2的波段数
+    bands_sentinel1 = sentinel1_data.shape[0]
+    bands_sentinel2 = sentinel2_data.shape[0]
+
+    # 创建一个空数组来存储融合后的数据
+    fused_data = np.zeros((bands_sentinel1 + bands_sentinel2, sentinel1_data.shape[1], sentinel1_data.shape[2]),
+                          dtype=np.float32)
+
+    # 将哨兵1和哨兵2的数据复制到新数组中
+    fused_data[:bands_sentinel1, :, :] = sentinel1_data
+    fused_data[bands_sentinel1:, :, :] = sentinel2_data
+
+    # 创建输出文件
+    output_dir = settings.MEDIA_ROOT
+    driver = gdal.GetDriverByName('GTiff')
+    out_ds = driver.Create(os.path.join(settings.MEDIA_ROOT, 'outMerge.tif'), sentinel1_data.shape[2], sentinel1_data.shape[1],
+                           bands_sentinel1 + bands_sentinel2, gdal.GDT_Float32)
+
+    # 写入数据到输出文件
+    for i in range(bands_sentinel1 + bands_sentinel2):
+        out_ds.GetRasterBand(i + 1).WriteArray(fused_data[i, :, :])
+
+    # 关闭数据集
+    out_ds = None
+    sentinel1_ds = None
+    sentinel2_ds = None
+
+    response_data = {
+        'output_dir': output_dir
+    }
+
+    # 返回
+    return JsonResponse({'code': 1, 'data': response_data})
+
+
+
 
 
 
