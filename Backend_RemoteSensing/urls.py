@@ -18,6 +18,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from user import views as views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -32,4 +34,9 @@ urlpatterns = [
     path("users/register/", views.register_user),  # 用户注册的接口
     path("users/update_login/", views.update_user_login),  # 用户界面修改个人信息
     path("users/chlPre/", views.chl_pre),  # 叶绿素浓度预测
+    path("upload/", views.upload),  # 上传TIF影像
+    path("get_basicTifInfo/", views.tif_basicInfo),  # 获取TIF影像基本信息
 ]
+
+# 添加这行--- 允许所有的media文件被访问
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
